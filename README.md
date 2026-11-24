@@ -37,6 +37,22 @@ for order in core.get("/sales-orders/", params={"limit": 500}).json()["items"]:
 same for another service. A package the script needs is added to the one environment with
 `uv tool install idi-xio --with <package>`.
 
+## Settings
+
+Every setting has a default and is overridden by an environment variable:
+
+| Variable | Default |
+| --- | --- |
+| `XIO_TENANT` | The Impress Designs directory |
+| `XIO_DEFAULT_SERVICE` | `core` |
+| `XIO_TIMEOUT_SECONDS` | `60` |
+| `XIO_CORE_URL`, `XIO_CORE_SCOPE` | Core and its sign-in scope |
+| `XIO_LOCAL_API_URL`, `XIO_LOCAL_API_SCOPE` | Local API and its scope |
+| `XIO_GRAPH_URL`, `XIO_GRAPH_SCOPE` | Microsoft Graph and its scope |
+| `XIO_ARM_URL`, `XIO_ARM_SCOPE` | Azure Resource Manager and its scope |
+
+Settings come from the environment only. Xio does not read a `.env` file.
+
 ## Install
 
 From a checkout:

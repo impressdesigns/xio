@@ -4,17 +4,16 @@ from typing import TYPE_CHECKING
 
 import niquests
 
+from xio.config import Config
 from xio.tokens import get_token
 
 if TYPE_CHECKING:
     from xio.services import Service
 
-TIMEOUT_SECONDS = 60
-
 
 def anonymous(service: Service) -> niquests.Session:
     """Return a session for ``service`` that sends no token."""
-    return niquests.Session(base_url=service.base_url, timeout=TIMEOUT_SECONDS)
+    return niquests.Session(base_url=service.base_url, timeout=Config.timeout_seconds)
 
 
 def signed_in(service: Service) -> niquests.Session:
