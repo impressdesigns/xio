@@ -31,13 +31,12 @@ def stand_in_for_az(
     return commands
 
 
-def test_get_token_asks_az_for_the_services_scope(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_get_token_asks_az_for_the_services_scope(monkeypatch: pytest.MonkeyPatch, other: services.Service) -> None:
     """The token comes from az, for the scope of the service asked for."""
     commands = stand_in_for_az(monkeypatch, stdout=json.dumps({"accessToken": "abc"}))
-    graph = services.by_name("graph")
 
-    assert tokens.get_token(graph) == "abc"
-    assert graph.scope in commands[0]
+    assert tokens.get_token(other) == "abc"
+    assert other.scope in commands[0]
 
 
 def test_a_failed_az_call_says_how_to_sign_in(monkeypatch: pytest.MonkeyPatch) -> None:

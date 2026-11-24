@@ -12,8 +12,6 @@ class _Config(BaseSettings, env_prefix="xio_", extra="ignore", frozen=True):
 
     core_url: str = "https://core.impressdesigns.com"
     core_scope: str = "https://core.impressdesigns.com/.default"
-    graph_url: str = "https://graph.microsoft.com"
-    graph_scope: str = "https://graph.microsoft.com/.default"
 
 
 Config = _Config()

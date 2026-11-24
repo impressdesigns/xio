@@ -1,16 +1,13 @@
 """Tests for the auth commands."""
 
 import json
-from typing import TYPE_CHECKING
 
+import pytest
 from typer.testing import CliRunner
 
 from tests.test_tokens import make_token
 from xio import tokens
 from xio.cli.app import app
-
-if TYPE_CHECKING:
-    import pytest
 
 runner = CliRunner()
 
@@ -25,17 +22,18 @@ def test_token_prints_only_the_token(monkeypatch: pytest.MonkeyPatch) -> None:
     assert result.stdout == "abc\n"
 
 
+@pytest.mark.usefixtures("other")
 def test_status_reports_the_account_and_expiry(monkeypatch: pytest.MonkeyPatch) -> None:
     """`auth status` prints who is signed in and when the token runs out, as JSON."""
     monkeypatch.setattr(tokens, "account", lambda: "someone@example.com")
     monkeypatch.setattr(tokens, "get_token", lambda _: make_token(exp=1893553445))
 
-    result = runner.invoke(app, ["auth", "status", "--service", "graph"])
+    result = runner.invoke(app, ["auth", "status", "--service", "other"])
 
     assert result.exit_code == 0
     status = json.loads(result.stdout)
     assert status["account"] == "someone@example.com"
-    assert status["service"] == "graph"
+    assert status["service"] == "other"
 
 
 def test_status_fails_when_not_signed_in() -> None:

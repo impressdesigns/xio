@@ -15,13 +15,7 @@ class Service:
     scope: str
 
 
-SERVICES = {
-    service.name: service
-    for service in (
-        Service("core", Config.core_url.rstrip("/"), Config.core_scope),
-        Service("graph", Config.graph_url.rstrip("/"), Config.graph_scope),
-    )
-}
+SERVICES = {service.name: service for service in (Service("core", Config.core_url.rstrip("/"), Config.core_scope),)}
 
 
 class UnknownServiceError(LookupError):
