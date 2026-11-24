@@ -28,7 +28,7 @@ def test_the_defaults_stand_without_variables(monkeypatch: pytest.MonkeyPatch) -
     settings = type(config.Config)()
 
     assert settings.default_service == "core"
-    assert settings.core_scope.startswith(settings.core_url)
+    assert settings.core_scope == f"{settings.core_url}/.default"
 
 
 def test_a_dotenv_file_is_not_read(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:

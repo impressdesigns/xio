@@ -11,7 +11,7 @@ class _Config(BaseSettings, env_prefix="xio_", extra="ignore", frozen=True):
     timeout_seconds: float = 60
 
     core_url: str = "https://core.impressdesigns.com"
-    core_scope: str = "https://core.impressdesigns.com/access_as_user"
+    core_scope: str = "https://core.impressdesigns.com/.default"
     local_api_url: str = "https://local-api.impressdesigns.com"
     local_api_scope: str = "https://local-api.impressdesigns.com/.default"
     graph_url: str = "https://graph.microsoft.com"
