@@ -9,6 +9,8 @@ class _Config(BaseSettings, env_prefix="xio_", extra="ignore", frozen=True):
     tenant: str = "0bfaee50-a856-4466-8122-c331879d0dba"
     default_service: str = "core"
     timeout_seconds: float = 60
+    attempts: int = 4
+    retry_wait_limit_seconds: float = 60
 
     core_url: str = "https://core.impressdesigns.com"
     core_scope: str = "https://core.impressdesigns.com/.default"

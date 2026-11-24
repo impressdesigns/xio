@@ -1,7 +1,8 @@
 """Tests for xio.run, the run command and the clients a script imports."""
 
 import sys
-from typing import TYPE_CHECKING
+import time
+from typing import TYPE_CHECKING, Any
 
 import niquests
 import pytest
@@ -11,12 +12,13 @@ import xio
 import xio.client
 from tests.stand_in import paged
 from xio.cli.app import app
+from xio.config import Config
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
     from pathlib import Path
 
-    from tests.stand_in import Server
+    from tests.stand_in import Handler, Server
 
 runner = CliRunner()
 
@@ -147,3 +149,96 @@ def test_items_raises_when_a_page_fails(core: Server) -> None:
 
     with pytest.raises(niquests.HTTPError):
         list(xio.items("/things/"))
+
+
+@pytest.fixture
+def waits(monkeypatch: pytest.MonkeyPatch) -> list[float]:
+    """Record the waits between attempts instead of sleeping through them."""
+    waited: list[float] = []
+    monkeypatch.setattr(time, "sleep", waited.append)
+    return waited
+
+
+def answers(*replies: tuple[int, object]) -> Handler:
+    """Serve ``replies`` in turn, then the last one for good."""
+    remaining = list(replies)
+
+    def handler(_: dict[str, Any]) -> tuple[int, object]:
+        return remaining.pop(0) if len(remaining) > 1 else remaining[0]
+
+    return handler
+
+
+def test_a_throttled_request_is_sent_again(core: Server, waits: list[float]) -> None:
+    """A 429 is retried whatever the method, since the service did nothing with it."""
+    core.handler = answers((429, {}), (429, {}), (200, {"ok": True}))
+
+    assert xio.core.post("/things/", json={"a": 1}).json() == {"ok": True}
+    assert [seen["body"] for seen in core.requests] == ['{"a": 1}'] * 3
+    assert waits == [2.0, 4.0]
+
+
+def test_a_failed_read_is_sent_again(core: Server, waits: list[float]) -> None:
+    """A 5xx on a GET is retried."""
+    core.handler = answers((503, {}), (200, {"ok": True}))
+
+    assert xio.core.get("/things/").json() == {"ok": True}
+    assert len(waits) == 1
+
+
+def test_a_failed_write_is_not_sent_again(core: Server, waits: list[float]) -> None:
+    """A 5xx on a POST raises at once: the service may have acted on it."""
+    core.handler = answers((500, {"detail": "boom"}))
+
+    with pytest.raises(niquests.HTTPError):
+        xio.core.post("/things/", json={})
+
+    assert len(core.requests) == 1
+    assert waits == []
+
+
+def test_retrying_gives_up(core: Server, waits: list[float]) -> None:
+    """After the configured number of attempts the failure raises."""
+    core.handler = answers((503, {}))
+
+    with pytest.raises(niquests.HTTPError, match="503"):
+        xio.core.get("/things/")
+
+    assert len(core.requests) == Config.attempts
+    assert len(waits) == Config.attempts - 1
+
+
+def test_the_wait_is_the_one_the_service_asks_for(core: Server, waits: list[float]) -> None:
+    """Retry-After sets the wait, up to the configured limit."""
+    core.headers = [("Retry-After", "7")]
+    core.handler = answers((429, {}), (200, {}))
+    xio.core.get("/things/")
+
+    core.headers = [("Retry-After", "9999")]
+    core.handler = answers((429, {}), (200, {}))
+    xio.core.get("/things/")
+
+    assert waits == [7.0, Config.retry_wait_limit_seconds]
+
+
+@pytest.mark.usefixtures("waits")
+def test_a_refused_token_is_renewed_once(core: Server, monkeypatch: pytest.MonkeyPatch) -> None:
+    """A 401 gets a new token and one more try, and the new token is kept for later requests."""
+    monkeypatch.setattr(xio.client, "get_token", lambda _: "renewed")
+    core.handler = lambda seen: (200, {}) if seen["authorization"] == "Bearer renewed" else (401, {})
+
+    xio.core.get("/me")
+    xio.core.get("/me")
+
+    assert [seen["authorization"] for seen in core.requests] == ["Bearer stand-in", "Bearer renewed", "Bearer renewed"]
+
+
+def test_a_token_refused_twice_raises(core: Server, monkeypatch: pytest.MonkeyPatch) -> None:
+    """A 401 that a new token does not cure raises."""
+    monkeypatch.setattr(xio.client, "get_token", lambda _: "renewed")
+    core.handler = answers((401, {"detail": "Not you."}))
+
+    with pytest.raises(niquests.HTTPError, match="401"):
+        xio.core.get("/me")
+
+    assert len(core.requests) == 2

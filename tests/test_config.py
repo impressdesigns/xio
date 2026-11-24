@@ -17,7 +17,11 @@ def test_every_setting_reads_its_xio_variable(monkeypatch: pytest.MonkeyPatch) -
 
     settings = type(config.Config)()
 
-    assert settings.model_dump() == dict.fromkeys(type(settings).model_fields, "7") | {"timeout_seconds": 7.0}
+    assert settings.model_dump() == dict.fromkeys(type(settings).model_fields, "7") | {
+        "timeout_seconds": 7.0,
+        "attempts": 7,
+        "retry_wait_limit_seconds": 7.0,
+    }
 
 
 def test_the_defaults_stand_without_variables(monkeypatch: pytest.MonkeyPatch) -> None:
