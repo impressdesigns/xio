@@ -45,6 +45,7 @@ uv run xio --help
 - **`import xio` imports no HTTP stack and asks for no token.** `xio.core` and `xio.session(name)` sign in on first use, so a script that never calls a service never needs the Azure CLI.
 - **Xio carries no SDK as a dependency.** A script that needs a package gets it with `uv tool install idi-xio --with <package>`, which keeps one environment.
 - **Every setting is a field of `xio.config.Config`**, overridden by `XIO_<NAME>` in the environment. No other module reads the environment or hard-codes a tenant, URL, scope or timeout. A `.env` file is never read: one left in a working directory could point a token at another host.
+- **Core is the only service today, and the choice between services stays.** `--service`, `services.resolve` and `xio.session(name)` are kept so a second service is a URL and scope pair on `Config` and one line in `SERVICES`. The tests register a stand-in second service to keep that path exercised.
 - **A service is a base URL and a scope, nothing more.** Paths, entitlement codes and record shapes are never compiled in.
 - **The suite never reaches the Azure CLI or the network.** `tests/conftest.py` removes both; a test that needs one puts a stand-in there.
 - **`xio doctor` prints machine-readable JSON** through `RichLog.raw`, which prints verbatim (no markup, highlighting or wrapping), so the output still parses after being piped to a file.

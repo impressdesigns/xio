@@ -7,7 +7,6 @@ xio api /me                                         # an authenticated GET to Co
 xio api /sales-orders/ -X GET -f limit=500 --paginate --jq '.items[].number'
 xio api /things/ -f name=Widget -F count=3          # fields with no -X are POSTed as JSON
 xio api /things/1 -X PATCH --input changes.json     # a body from a file, or - for stdin
-xio api --service graph /v1.0/me --jq .mail         # core or graph
 
 xio run script.py --its-own --options           # a script, in Xio's environment
 
@@ -33,8 +32,8 @@ for order in core.get("/sales-orders/", params={"limit": 500}).json()["items"]:
     print(order["number"])
 ```
 
-`core` is a `niquests` session with Core's base URL and a token set. `xio.session("graph")` gives the
-same for another service. A package the script needs is added to the one environment with
+`core` is a `niquests` session with Core's base URL and a token set. A package the script needs is
+added to the one environment with
 `uv tool install idi-xio --with <package>`.
 
 ## Settings
@@ -47,7 +46,6 @@ Every setting has a default and is overridden by an environment variable:
 | `XIO_DEFAULT_SERVICE` | `core` |
 | `XIO_TIMEOUT_SECONDS` | `60` |
 | `XIO_CORE_URL`, `XIO_CORE_SCOPE` | Core and its sign-in scope |
-| `XIO_GRAPH_URL`, `XIO_GRAPH_SCOPE` | Microsoft Graph and its scope |
 
 Settings come from the environment only. Xio does not read a `.env` file.
 
