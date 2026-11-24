@@ -19,9 +19,7 @@ SERVICES = {
     service.name: service
     for service in (
         Service("core", Config.core_url.rstrip("/"), Config.core_scope),
-        Service("local-api", Config.local_api_url.rstrip("/"), Config.local_api_scope),
         Service("graph", Config.graph_url.rstrip("/"), Config.graph_scope),
-        Service("arm", Config.arm_url.rstrip("/"), Config.arm_scope),
     )
 }
 

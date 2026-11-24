@@ -1,7 +1,7 @@
 [project]
 name = "idi-xio"
 version = "0.10.0"
-description = "Command-line helper for Core and Azure"
+description = "Command-line data helper for Core"
 readme = "README.md"
 license = "Apache-2.0"
 license-files = ["LICENSE"]

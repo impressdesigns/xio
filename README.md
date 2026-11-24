@@ -1,13 +1,13 @@
 # Xio
 
-A command-line helper for Core and Azure.
+A command-line data helper for Core.
 
 ```powershell
 xio api /me                                         # an authenticated GET to Core
 xio api /sales-orders/ -X GET -f limit=500 --paginate --jq '.items[].number'
 xio api /things/ -f name=Widget -F count=3          # fields with no -X are POSTed as JSON
 xio api /things/1 -X PATCH --input changes.json     # a body from a file, or - for stdin
-xio api --service graph /v1.0/me --jq .mail         # core, local-api, graph or arm
+xio api --service graph /v1.0/me --jq .mail         # core or graph
 
 xio run script.py --its-own --options           # a script, in Xio's environment
 
@@ -47,9 +47,7 @@ Every setting has a default and is overridden by an environment variable:
 | `XIO_DEFAULT_SERVICE` | `core` |
 | `XIO_TIMEOUT_SECONDS` | `60` |
 | `XIO_CORE_URL`, `XIO_CORE_SCOPE` | Core and its sign-in scope |
-| `XIO_LOCAL_API_URL`, `XIO_LOCAL_API_SCOPE` | Local API and its scope |
 | `XIO_GRAPH_URL`, `XIO_GRAPH_SCOPE` | Microsoft Graph and its scope |
-| `XIO_ARM_URL`, `XIO_ARM_SCOPE` | Azure Resource Manager and its scope |
 
 Settings come from the environment only. Xio does not read a `.env` file.
 

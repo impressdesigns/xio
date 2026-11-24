@@ -4,7 +4,7 @@ Operational guidance for AI agents working in Xio. Human contributor guide: [CON
 
 ## Project Overview
 
-Xio is a developer's command-line helper for Core and Azure, installed on a Windows machine with `uv tool install`. It makes authenticated requests the way `gh api` does (`xio api`), runs scripts in its own environment with a signed-in client (`xio run`), signs in through the Azure CLI (`xio auth`) and prints a support report (`xio doctor`).
+Xio is a developer's command-line data helper for Core, installed on a Windows machine with `uv tool install`. It makes authenticated requests the way `gh api` does (`xio api`), runs scripts in its own environment with a signed-in client (`xio run`), signs in through the Azure CLI (`xio auth`) and prints a support report (`xio doctor`).
 
 - **Stack:** Python 3.15, [uv](https://docs.astral.sh/uv/), Typer, niquests, jq.
 - **Role:** A developer tool.
