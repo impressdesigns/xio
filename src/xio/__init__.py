@@ -8,7 +8,8 @@ A script run with ``xio run`` imports its signed-in clients from here::
 
 ``core`` is a ``niquests`` session with Core's base URL and a token already set; ``session(name)``
 returns the same for any other service. A failed response raises ``niquests.HTTPError``, so a
-script needs no ``raise_for_status()``. ``items(path)`` yields every item of a list, page by page.
+script needs no ``raise_for_status()``. A throttled or failed request is sent again first, and an
+expired token is renewed. ``items(path)`` yields every item of a list, page by page.
 """
 
 from functools import cache

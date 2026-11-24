@@ -39,6 +39,11 @@ for order in items("/sales-orders/", limit=500):
 `raise_for_status()`; catch the error and read its `.response` to handle one. `items(path, **query)`
 yields every item of a list and fetches each page as the loop reaches it.
 
+Before it raises, the client waits and sends a request again when the service throttles it (429)
+or, for a read, PUT or DELETE, when the service fails (5xx). It honours `Retry-After`. A POST or
+PATCH that fails is never sent twice. A 401 gets one more try with a new token, so a script can
+run longer than a token lasts.
+
 A package the script needs is added to the one environment with
 `uv tool install idi-xio --with <package>`.
 
@@ -51,6 +56,8 @@ Every setting has a default and is overridden by an environment variable:
 | `XIO_TENANT` | The Impress Designs directory |
 | `XIO_DEFAULT_SERVICE` | `core` |
 | `XIO_TIMEOUT_SECONDS` | `60` |
+| `XIO_ATTEMPTS` | `4` |
+| `XIO_RETRY_WAIT_LIMIT_SECONDS` | `60` |
 | `XIO_CORE_URL`, `XIO_CORE_SCOPE` | Core and its sign-in scope |
 
 Settings come from the environment only. Xio does not read a `.env` file.

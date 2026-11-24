@@ -28,6 +28,7 @@ class Server:
     def __init__(self, handler: Handler = echo) -> None:
         self.handler = handler
         self.requests: list[dict[str, Any]] = []
+        self.headers: list[tuple[str, str]] = []
 
     def __call__(self, environ: dict[str, Any], start_response: Callable[..., object]) -> Iterable[bytes]:
         """Serve one request as a WSGI application."""
@@ -43,7 +44,9 @@ class Server:
         self.requests.append(seen)
         status, reply = self.handler(seen)
         body = reply if isinstance(reply, bytes) else json.dumps(reply).encode()
-        start_response(f"{status} Status", [("Content-Type", "application/json"), ("X-Served-By", "stand-in")])
+        start_response(
+            f"{status} Status", [("Content-Type", "application/json"), ("X-Served-By", "stand-in"), *self.headers]
+        )
         return [body]
 
     def session(self) -> niquests.Session:
