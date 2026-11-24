@@ -8,8 +8,8 @@ import pytest
 from typer.testing import CliRunner
 
 import xio
+import xio.client
 from tests.stand_in import paged
-from xio import client, session
 from xio.cli.app import app
 
 if TYPE_CHECKING:
@@ -80,13 +80,13 @@ def test_a_script_gets_a_signed_in_core_client(tmp_path: Path, monkeypatch: pyte
         made.append(getattr(service, "name", ""))
         return "the-core-session"
 
-    monkeypatch.setattr(client, "scripting", signed_in)
-    session.cache_clear()
+    monkeypatch.setattr(xio.client, "scripting", signed_in)
+    xio.session.cache_clear()
     script = tmp_path / "script.py"
     script.write_text("from xio import core\nimport xio\nprint(core, xio.core is core)\n")
 
     result = runner.invoke(app, ["run", str(script)])
-    session.cache_clear()
+    xio.session.cache_clear()
 
     assert result.stdout == "the-core-session True\n"
     assert made == ["core"]
@@ -95,9 +95,9 @@ def test_a_script_gets_a_signed_in_core_client(tmp_path: Path, monkeypatch: pyte
 @pytest.fixture
 def core(server: Server) -> Iterator[Server]:
     """Make `xio.core` a fresh session against the stand-in."""
-    session.cache_clear()
+    xio.session.cache_clear()
     yield server
-    session.cache_clear()
+    xio.session.cache_clear()
 
 
 def test_a_failed_response_raises_with_its_body(core: Server) -> None:
