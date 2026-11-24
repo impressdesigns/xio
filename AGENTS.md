@@ -42,6 +42,7 @@ uv run xio --help
 - **A token goes only to its own service.** `services.resolve` refuses a URL whose host is not a listed service's.
 - **`xio api` keeps `gh api`'s options and meanings.** Someone who knows one knows the other; an option that differs is a bug.
 - **Pagination follows what the response says**: Core's `items`/`total`/`limit`/`offset` list envelope, or a next link on the service's own host.
+- **A script's client fails loudly and pages for it.** `xio.session(name)` comes from `client.scripting`, whose response hook raises `niquests.HTTPError` with the body in the message; `xio.items` walks a list with the same paging `xio api --paginate` uses. `xio api` keeps `client.signed_in`, which never raises, because it prints a failed response's body itself.
 - **`import xio` imports no HTTP stack and asks for no token.** `xio.core` and `xio.session(name)` sign in on first use, so a script that never calls a service never needs the Azure CLI.
 - **Xio carries no SDK as a dependency.** A script that needs a package gets it with `uv tool install idi-xio --with <package>`, which keeps one environment.
 - **Every setting is a field of `xio.config.Config`**, overridden by `XIO_<NAME>` in the environment. No other module reads the environment or hard-codes a tenant, URL, scope or timeout. A `.env` file is never read: one left in a working directory could point a token at another host.
@@ -59,7 +60,7 @@ src/xio/
 ├── services.py               # The APIs: name, base URL, token scope; path and URL resolution
 ├── tokens.py                 # Tokens and the signed-in account, from the Azure CLI
 ├── client.py                 # niquests sessions for a service, with or without a token
-├── __init__.py               # What a script imports: core, session(name)
+├── __init__.py               # What a script imports: core, session(name), items(path)
 ├── run.py                    # Running a script as __main__ in this environment
 ├── api.py                    # Building, sending, paging and rendering one request
 ├── doctor.py                 # Diagnostic report: tool, system, runtime, checks
@@ -70,7 +71,7 @@ src/xio/
     ├── doctor.py             # xio doctor
     ├── run.py                # xio run
     └── output.py             # RichLog: timestamped, level-filtered console output
-tests/                        # One test module per source module
+tests/                        # One test module per source module; stand_in.py is the fake service
 pyproject.toml                # Project, the dev group, ruff/mypy/ty/coverage/pytest settings
 .python-version               # The Python CI and uv use
 noxfile.py                    # lints, tests, clean
