@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Annotated
 import typer
 
 from xio import services, tokens
+from xio.config import Config
 
 if TYPE_CHECKING:
     from xio.cli.output import RichLog
@@ -28,7 +29,7 @@ def login(ctx: typer.Context) -> None:
 
 
 @app.command()
-def status(ctx: typer.Context, service: ServiceOption = services.DEFAULT_SERVICE) -> None:
+def status(ctx: typer.Context, service: ServiceOption = Config.default_service) -> None:
     """Show who is signed in and whether a token can be had."""
     console: RichLog = ctx.obj
     try:
@@ -44,7 +45,7 @@ def status(ctx: typer.Context, service: ServiceOption = services.DEFAULT_SERVICE
 
 
 @app.command()
-def token(ctx: typer.Context, service: ServiceOption = services.DEFAULT_SERVICE) -> None:
+def token(ctx: typer.Context, service: ServiceOption = Config.default_service) -> None:
     """Print a bearer token."""
     console: RichLog = ctx.obj
     try:

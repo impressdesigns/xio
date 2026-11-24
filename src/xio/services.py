@@ -1,10 +1,9 @@
 """The APIs Xio can call: a base URL and the token scope that opens it."""
 
-import os
 from dataclasses import dataclass
 from urllib.parse import urlsplit
 
-TENANT = os.environ.get("XIO_TENANT", "0bfaee50-a856-4466-8122-c331879d0dba")
+from xio.config import Config
 
 
 @dataclass(frozen=True, slots=True)
@@ -19,14 +18,12 @@ class Service:
 SERVICES = {
     service.name: service
     for service in (
-        Service("core", "https://core.impressdesigns.com", "https://core.impressdesigns.com/access_as_user"),
-        Service("local-api", "https://local-api.impressdesigns.com", "https://local-api.impressdesigns.com/.default"),
-        Service("graph", "https://graph.microsoft.com", "https://graph.microsoft.com/.default"),
-        Service("arm", "https://management.azure.com", "https://management.azure.com/.default"),
+        Service("core", Config.core_url.rstrip("/"), Config.core_scope),
+        Service("local-api", Config.local_api_url.rstrip("/"), Config.local_api_scope),
+        Service("graph", Config.graph_url.rstrip("/"), Config.graph_scope),
+        Service("arm", Config.arm_url.rstrip("/"), Config.arm_scope),
     )
 }
-
-DEFAULT_SERVICE = "core"
 
 
 class UnknownServiceError(LookupError):
@@ -63,5 +60,5 @@ def resolve(target: str, name: str | None = None) -> tuple[Service, str]:
             msg = f"{target} belongs to {service.name!r}, not {name!r}."
             raise UnknownServiceError(msg)
         return service, target
-    service = by_name(name or DEFAULT_SERVICE)
+    service = by_name(name or Config.default_service)
     return service, f"{service.base_url}/{target.lstrip('/')}"

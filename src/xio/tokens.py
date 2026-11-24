@@ -8,11 +8,14 @@ import json
 import shutil
 import subprocess
 from datetime import UTC, datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from xio.services import TENANT, Service
+from xio.config import Config
 
-LOGIN_COMMAND = ("az", "login", "--tenant", TENANT, "--allow-no-subscriptions")
+if TYPE_CHECKING:
+    from xio.services import Service
+
+LOGIN_COMMAND = ("az", "login", "--tenant", Config.tenant, "--allow-no-subscriptions")
 
 
 class TokenError(RuntimeError):
@@ -39,7 +42,9 @@ def _run(*arguments: str) -> str:
 
 def get_token(service: Service) -> str:
     """Return a bearer token for ``service``."""
-    output = _run("account", "get-access-token", "--tenant", TENANT, "--scope", service.scope, "--output", "json")
+    output = _run(
+        "account", "get-access-token", "--tenant", Config.tenant, "--scope", service.scope, "--output", "json"
+    )
     token = json.loads(output).get("accessToken")
     if not isinstance(token, str):
         message = "az returned no access token."

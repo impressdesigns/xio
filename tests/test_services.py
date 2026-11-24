@@ -9,7 +9,7 @@ def test_a_path_goes_to_the_default_service() -> None:
     """A bare path is joined to the default service's base URL."""
     service, url = services.resolve("/me")
 
-    assert service.name == services.DEFAULT_SERVICE
+    assert service.name == "core"
     assert url == f"{service.base_url}/me"
 
 
