@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+.cache/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.nox/
+.env
+dist/
+build/
+coverage.xml
