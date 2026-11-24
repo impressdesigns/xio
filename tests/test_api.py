@@ -2,86 +2,18 @@
 
 import json
 from typing import TYPE_CHECKING, Any
-from urllib.parse import parse_qs
 
-import niquests
 import pytest
 from typer.testing import CliRunner
 
-from xio import api, client, services
+from tests.stand_in import SERVICE, Reply, Server, paged
+from xio import api
 from xio.cli.app import app
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterable
     from pathlib import Path
 
 runner = CliRunner()
-
-SERVICE = services.Service("core", "https://service.test", "https://service.test/.default")
-
-type Reply = tuple[int, Any]
-type Handler = Callable[[dict[str, Any]], Reply]
-
-
-def echo(seen: dict[str, Any]) -> Reply:
-    """Answer with the request as the server saw it."""
-    return 200, seen
-
-
-class Server:
-    """A stand-in service that records what it was sent."""
-
-    def __init__(self, handler: Handler = echo) -> None:
-        self.handler = handler
-        self.requests: list[dict[str, Any]] = []
-
-    def __call__(self, environ: dict[str, Any], start_response: Callable[..., object]) -> Iterable[bytes]:
-        """Serve one request as a WSGI application."""
-        seen = {
-            "method": environ["REQUEST_METHOD"],
-            "path": environ["PATH_INFO"],
-            "query": {key: values[-1] for key, values in parse_qs(environ["QUERY_STRING"]).items()},
-            "body": environ["wsgi.input"].read().decode(),
-            "content_type": environ.get("CONTENT_TYPE"),
-            "authorization": environ.get("HTTP_AUTHORIZATION"),
-            "x_test": environ.get("HTTP_X_TEST"),
-        }
-        self.requests.append(seen)
-        status, reply = self.handler(seen)
-        body = reply if isinstance(reply, bytes) else json.dumps(reply).encode()
-        start_response(f"{status} Status", [("Content-Type", "application/json"), ("X-Served-By", "stand-in")])
-        return [body]
-
-    def session(self) -> niquests.Session:
-        """Return a session whose requests to the stand-in's host land here."""
-        session = niquests.Session(app=self)
-        session.mount(SERVICE.base_url, session.get_adapter("wsgi://default"))
-        session.headers["Authorization"] = "Bearer stand-in"
-        return session
-
-
-@pytest.fixture
-def server(monkeypatch: pytest.MonkeyPatch) -> Server:
-    """Put a stand-in service where Core would be."""
-    stand_in = Server()
-    monkeypatch.setitem(services.SERVICES, SERVICE.name, SERVICE)
-    monkeypatch.setattr(client, "signed_in", lambda _: stand_in.session())
-    return stand_in
-
-
-def paged(rows: list[int], page_size: int) -> Handler:
-    """Serve ``rows`` in the list envelope, ``page_size`` at a time."""
-
-    def handler(seen: dict[str, Any]) -> Reply:
-        offset = int(seen["query"].get("offset", 0))
-        return 200, {
-            "items": rows[offset : offset + page_size],
-            "total": len(rows),
-            "limit": page_size,
-            "offset": offset,
-        }
-
-    return handler
 
 
 def test_typed_fields_read_json_scalars_and_leave_the_rest_as_text() -> None:

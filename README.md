@@ -26,14 +26,20 @@ When a call needs a loop or some logic, write a script with no dependency header
 `xio run`. It runs in Xio's own environment, so it creates none, and it imports a signed-in client:
 
 ```python
-from xio import core
+from xio import core, items
 
-for order in core.get("/sales-orders/", params={"limit": 500}).json()["items"]:
+me = core.get("/me").json()
+
+for order in items("/sales-orders/", limit=500):
     print(order["number"])
 ```
 
-`core` is a `niquests` session with Core's base URL and a token set. A package the script needs is
-added to the one environment with
+`core` is a `niquests` session with Core's base URL and a token set. A failed response raises
+`niquests.HTTPError` with the response body in its message, so a script needs no
+`raise_for_status()`; catch the error and read its `.response` to handle one. `items(path, **query)`
+yields every item of a list and fetches each page as the loop reaches it.
+
+A package the script needs is added to the one environment with
 `uv tool install idi-xio --with <package>`.
 
 ## Settings

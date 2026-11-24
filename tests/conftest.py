@@ -2,7 +2,8 @@
 
 import pytest
 
-from xio import doctor, services, tokens
+from tests.stand_in import SERVICE, Server
+from xio import client, doctor, services, tokens
 
 
 @pytest.fixture(autouse=True)
@@ -18,3 +19,12 @@ def other(monkeypatch: pytest.MonkeyPatch) -> services.Service:
     service = services.Service("other", "https://other.test", "https://other.test/.default")
     monkeypatch.setitem(services.SERVICES, service.name, service)
     return service
+
+
+@pytest.fixture
+def server(monkeypatch: pytest.MonkeyPatch) -> Server:
+    """Put a stand-in service where Core would be."""
+    stand_in = Server()
+    monkeypatch.setitem(services.SERVICES, SERVICE.name, SERVICE)
+    monkeypatch.setattr(client, "signed_in", lambda _: stand_in.session())
+    return stand_in
