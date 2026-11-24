@@ -12,12 +12,8 @@ class _Config(BaseSettings, env_prefix="xio_", extra="ignore", frozen=True):
 
     core_url: str = "https://core.impressdesigns.com"
     core_scope: str = "https://core.impressdesigns.com/.default"
-    local_api_url: str = "https://local-api.impressdesigns.com"
-    local_api_scope: str = "https://local-api.impressdesigns.com/.default"
     graph_url: str = "https://graph.microsoft.com"
     graph_scope: str = "https://graph.microsoft.com/.default"
-    arm_url: str = "https://management.azure.com"
-    arm_scope: str = "https://management.azure.com/.default"
 
 
 Config = _Config()

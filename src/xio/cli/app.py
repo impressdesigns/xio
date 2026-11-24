@@ -10,7 +10,7 @@ from xio.cli.doctor import app as doctor_app
 from xio.cli.output import RichLog
 from xio.cli.run import run_command
 
-app = typer.Typer(name="xio", help="Command-line helper for Core and Azure", no_args_is_help=True, add_completion=False)
+app = typer.Typer(name="xio", help="Command-line data helper for Core", no_args_is_help=True, add_completion=False)
 
 app.command(name="api")(api_command)
 app.add_typer(auth_app, name="auth")
